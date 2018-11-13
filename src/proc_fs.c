@@ -68,8 +68,13 @@ SECTION *get_section(PROC_HANDLE *handle, int section_id, SECTION *section) {
 	if (fgetc(handle->map_file) == 'p')
 		section->perms |= pr;
 	fscanf(handle->map_file, " %llx", &section->file_offset);
-	fscanf(handle->map_file, " %*d:%*d %*d ");
-	fscanf(handle->map_file, "%s", section->file_name);
+	fscanf(handle->map_file, " %*d:%*d %*d");
+	fgetc(handle->map_file);
+	if(fgetc(handle->map_file) != '\n'){
+		fscanf(handle->map_file, " ");
+		fscanf(handle->map_file, "%s", section->file_name);
+	}else
+		section->file_name[0] = 0;
 	return section;
 }
 
