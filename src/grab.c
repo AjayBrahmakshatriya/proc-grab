@@ -14,5 +14,10 @@ int main(int argc, char *argv[]) {
 	pid_t pid = atoi(argv[1]);
 
 	PROC_HANDLE *process = attach_process(pid);
+	printf("Number of sections = %d\n", get_section_count(process));
+	SECTION section;
+	get_section(process, 0, &section);
+	printf("%llx-%llx %d %llx %s\n", section.lower, section.upper, section.perms, section.file_offset, section.file_name);
+
 
 }
