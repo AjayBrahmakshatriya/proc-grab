@@ -34,6 +34,8 @@ typedef struct {
 PROC_HANDLE* attach_process(pid_t pid);
 int get_section_count(PROC_HANDLE *handle);
 SECTION *get_section(PROC_HANDLE *handle, int section_id, SECTION *section);
+void detach_process(PROC_HANDLE *handle);
+
 
 
 #endif

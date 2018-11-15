@@ -19,6 +19,13 @@ PROC_HANDLE *attach_process(pid_t pid) {
 	handle->map_file = NULL;
 	return handle;
 }
+void detach_process(PROC_HANDLE *handle) {
+	if (handle == NULL)
+		return;
+	if (handle->map_file != NULL)
+		fclose(handle->map_file);
+	free(handle);
+}
 
 void open_map_file(PROC_HANDLE *handle) {
 	if (handle->map_file == NULL) {
@@ -68,7 +75,7 @@ SECTION *get_section(PROC_HANDLE *handle, int section_id, SECTION *section) {
 	if (fgetc(handle->map_file) == 'p')
 		section->perms |= pr;
 	fscanf(handle->map_file, " %llx", &section->file_offset);
-	fscanf(handle->map_file, " %*d:%*d %*d");
+	fscanf(handle->map_file, " %*x:%*x %*d");
 	fgetc(handle->map_file);
 	if(fgetc(handle->map_file) != '\n'){
 		fscanf(handle->map_file, " ");
