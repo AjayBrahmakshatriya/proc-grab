@@ -37,3 +37,16 @@ void write_section(FILE_HANDLE *handle, SECTION_FILE_HEADER *header, char *raw_d
 	handle->header.number_of_sections++;
 	write_file_header(handle);
 }
+FILE_HANDLE* open_file(char *file_name) {
+	FILE *file_handle = fopen(file_name, "r");
+	if (file_handle == NULL) {
+		err("Cannot open file: %s for reading\n", file_name);
+		return NULL;
+	}
+	FILE_HANDLE *handle = malloc(sizeof * handle);
+	strcpy(handle->filename, file_name);
+	handle->file_handle = file_handle;
+	fread(&handle->header, sizeof(handle->header), 1, handle->file_handle);
+	handle->for_writing = 0;
+	return handle;
+}

@@ -2,6 +2,8 @@
 
 #include <stdlib.h>
 #include <errno.h>
+#include <string.h>
+
 
 PROC_HANDLE *attach_process(pid_t pid) {
 	if(ptrace(PTRACE_ATTACH, pid, NULL, NULL) == -1) {
@@ -17,6 +19,7 @@ PROC_HANDLE *attach_process(pid_t pid) {
 	PROC_HANDLE *handle = malloc(sizeof * handle);
 	handle->pid = pid;
 	handle->map_file = NULL;
+	handle->mem_file = NULL;
 	return handle;
 }
 void detach_process(PROC_HANDLE *handle) {
@@ -38,7 +41,17 @@ void open_map_file(PROC_HANDLE *handle) {
 		}
 	}	
 }
-
+void open_mem_file(PROC_HANDLE *handle) {
+	if (handle->mem_file == NULL) {
+		char filename[100];
+		sprintf(filename, "/proc/%d/mem", handle->pid);
+		handle->mem_file = fopen(filename, "r");
+		if (handle->mem_file == NULL) {
+			err("Error opening mem file for pid: %d\n", handle->pid);
+			return;
+		}
+	}
+}
 int get_section_count(PROC_HANDLE *handle) {
 	open_map_file(handle);
 	fseek(handle->map_file, 0, SEEK_SET);
@@ -85,3 +98,16 @@ SECTION *get_section(PROC_HANDLE *handle, int section_id, SECTION *section) {
 	return section;
 }
 
+int is_real_file(char * filename) {
+	if (strlen(filename) == 0)
+		return 0;
+	if (filename[0] == '/')
+		return 1;
+	return 0;
+}
+
+int get_section_raw_data(PROC_HANDLE *handle, SECTION *section, char *raw_data) {
+	open_mem_file(handle);
+	fseek(handle->mem_file, section->lower, SEEK_SET);
+	return fread(raw_data, section->size, 1, handle->mem_file);
+}

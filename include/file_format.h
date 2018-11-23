@@ -32,4 +32,5 @@ typedef struct {
 FILE_HANDLE* create_file(char *file_name);
 void close_file(FILE_HANDLE* handle);
 void write_section(FILE_HANDLE *handle, SECTION_FILE_HEADER *header, char *raw_data);
+FILE_HANDLE* open_file(char *file_name);
 #endif

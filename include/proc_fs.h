@@ -13,6 +13,7 @@ typedef struct {
 	pid_t pid;
 	int ptrace_fd;
 	FILE *map_file;
+	FILE *mem_file;
 }PROC_HANDLE;
 
 typedef enum {
@@ -35,7 +36,7 @@ PROC_HANDLE* attach_process(pid_t pid);
 int get_section_count(PROC_HANDLE *handle);
 SECTION *get_section(PROC_HANDLE *handle, int section_id, SECTION *section);
 void detach_process(PROC_HANDLE *handle);
-
-
+int is_real_file(char* filename);
+int get_section_raw_data(PROC_HANDLE *handle, SECTION *section, char *raw_data);
 
 #endif
