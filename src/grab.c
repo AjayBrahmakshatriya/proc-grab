@@ -39,6 +39,7 @@ int main(int argc, char *argv[]) {
 		section_header.upper = section.upper;
 		section_header.perms = section.perms;
 		section_header.type = file_mapped;
+		section_header.raw_data_offset = section.file_offset;
 		strcpy(section_header.filename, section.file_name);
 		
 		if (!is_real_file(section.file_name)) {

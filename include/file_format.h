@@ -19,6 +19,7 @@ typedef struct __attribute__((packed)) {
 	SECTION_PERMS perms;	
 	SECTION_TYPE type;
 	char filename[128];
+	unsigned long long raw_data_offset;
 }SECTION_FILE_HEADER;
 
 typedef struct {
@@ -33,4 +34,5 @@ FILE_HANDLE* create_file(char *file_name);
 void close_file(FILE_HANDLE* handle);
 void write_section(FILE_HANDLE *handle, SECTION_FILE_HEADER *header, char *raw_data);
 FILE_HANDLE* open_file(char *file_name);
+void read_section(FILE_HANDLE *handle, SECTION_FILE_HEADER *header);
 #endif

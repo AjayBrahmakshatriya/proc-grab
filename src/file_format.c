@@ -31,6 +31,8 @@ void close_file(FILE_HANDLE *handle) {
 	free(handle);
 }
 void write_section(FILE_HANDLE *handle, SECTION_FILE_HEADER *header, char *raw_data) {
+	if(header->type == raw && header->upper != header->lower)
+		header->raw_data_offset = ftell(handle->file_handle) + sizeof(*header);
 	fwrite(header, sizeof(*header), 1, handle->file_handle);
 	if(header->type == raw && header->upper != header->lower)
 		fwrite(raw_data, header->upper - header->lower, 1, handle->file_handle);
@@ -49,4 +51,10 @@ FILE_HANDLE* open_file(char *file_name) {
 	fread(&handle->header, sizeof(handle->header), 1, handle->file_handle);
 	handle->for_writing = 0;
 	return handle;
+}
+void read_section(FILE_HANDLE *handle, SECTION_FILE_HEADER *header) {
+	fread(header, sizeof(*header), 1, handle->file_handle);
+	if(header->type == raw && header->upper != header->lower)
+		fseek(handle->file_handle, header->upper - header->lower, SEEK_CUR);
+	
 }
