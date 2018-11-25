@@ -12,7 +12,7 @@ typedef struct {
 	unsigned long long section_data_start;
 
 	unsigned long long final_unmap_start;
-	unsigned long long final_unmap_end;
+	unsigned long long final_unmap_size;
 
 }LOADER_PARAMS;
 

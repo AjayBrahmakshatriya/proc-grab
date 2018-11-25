@@ -58,3 +58,8 @@ void read_section(FILE_HANDLE *handle, SECTION_FILE_HEADER *header) {
 		fseek(handle->file_handle, header->upper - header->lower, SEEK_CUR);
 	
 }
+void set_regs(FILE_HANDLE *handle, struct user_regs_struct *regs, struct user_fpregs_struct *fpregs) {
+	memcpy(&handle->header.regs, regs, sizeof(*regs));
+	memcpy(&handle->header.fpregs, fpregs, sizeof(*fpregs));
+	write_file_header(handle);
+}

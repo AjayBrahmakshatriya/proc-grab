@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
 	OFFSET(PARAMS_section_data_start, LOADER_PARAMS, section_data_start);
 
 	OFFSET(PARAMS_final_unmap_start, LOADER_PARAMS, final_unmap_start);
-	OFFSET(PARAMS_final_unmap_end, LOADER_PARAMS, final_unmap_end);
+	OFFSET(PARAMS_final_unmap_size, LOADER_PARAMS, final_unmap_size);
 
 	OFFSET(SECTION_start_address, SECTION_PARAMS, start_address);
 	OFFSET(SECTION_size, SECTION_PARAMS, size);

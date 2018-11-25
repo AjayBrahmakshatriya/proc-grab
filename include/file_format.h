@@ -6,6 +6,8 @@
 
 typedef struct __attribute__((packed)) {
 	int number_of_sections;
+	struct user_regs_struct regs;
+	struct user_fpregs_struct fpregs;
 }FILE_HEADER;
 
 typedef enum {
@@ -35,4 +37,5 @@ void close_file(FILE_HANDLE* handle);
 void write_section(FILE_HANDLE *handle, SECTION_FILE_HEADER *header, char *raw_data);
 FILE_HANDLE* open_file(char *file_name);
 void read_section(FILE_HANDLE *handle, SECTION_FILE_HEADER *header);
+void set_regs(FILE_HANDLE *handle, struct user_regs_struct *regs, struct user_fpregs_struct *fpregs);
 #endif

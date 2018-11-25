@@ -22,6 +22,11 @@ PROC_HANDLE *attach_process(pid_t pid) {
 	handle->mem_file = NULL;
 	return handle;
 }
+void get_regs(PROC_HANDLE *handle, struct user_regs_struct *regs, struct user_fpregs_struct *fpregs) {
+	ptrace(PTRACE_GETREGS, handle->pid, NULL, regs);
+	ptrace(PTRACE_GETFPREGS, handle->pid, NULL, fpregs);
+	return;
+}
 void detach_process(PROC_HANDLE *handle) {
 	if (handle == NULL)
 		return;
@@ -103,6 +108,22 @@ int is_real_file(char * filename) {
 		return 0;
 	if (filename[0] == '/')
 		return 1;
+	return 0;
+}
+int is_section_changed(PROC_HANDLE *handle, SECTION *section) {
+	open_mem_file(handle);
+	fseek(handle->mem_file, section->lower, SEEK_SET);
+	FILE *file = fopen(section->file_name, "r");
+	for (int i = 0; i < section->size/PAGE_SIZE; i++){
+		char buf1[PAGE_SIZE];
+		char buf2[PAGE_SIZE];
+		fread(buf1, PAGE_SIZE, 1, handle->mem_file);
+		fread(buf2, PAGE_SIZE, 1, file);
+		if(memcmp(buf1, buf2, PAGE_SIZE)){
+			fclose(file);
+			return 1;
+		}
+	}
 	return 0;
 }
 

@@ -41,6 +41,17 @@ mmap_raw:
 	syscall
 	test 	%rax, %rax
 	jl	error_exit
+
+	movq	%r12, %rdi
+	popq	%rcx
+	pushq	%rcx
+	movq	SECTION_offset(%rcx), %rsi
+	movq	$0, %rdx
+	movq	$8, %rax
+	syscall
+	test 	%rax, %rax
+	jl	error_exit
+	
 	movq	%r12, %rdi
 	popq	%rcx
 	pushq	%rcx
@@ -89,6 +100,13 @@ repeat_section:
 	decq	%rdx
 	jnz	repeat_section
 
+	movq	PARAMS_final_unmap_start(%rbx), %rdi
+	movq	PARAMS_final_unmap_size(%rbx), %rsi
+	movq	$11, %rax
+	syscall
+
+	
+	
 
 loop:
 	jmp loop

@@ -77,7 +77,8 @@ int main(int argc, char *argv[]) {
 	params->section_data_start = (unsigned long long)section_params;
 
 	params->final_unmap_start = (unsigned long long) load_address;
-	params->final_unmap_end = (unsigned long long) params->unmap_address_start;;
+	params->final_unmap_size = file_size_aligned + params_size_aligned;
+
 
 
 	for (int sec_id = 0; sec_id < file->header.number_of_sections; sec_id++) {
@@ -114,13 +115,54 @@ int main(int argc, char *argv[]) {
 		}
 		section_params++;
 	}
-	close_file(file);
 
+	struct user_regs_struct regs;
+	struct user_fpregs_struct fpregs;
+	memcpy(&regs, &(file->header.regs), sizeof(regs));
+	memcpy(&fpregs, &(file->header.fpregs), sizeof(fpregs));
+	close_file(file);
+	
+	int pipefd[2];
+	pipe(pipefd);
 
 	if(!fork()) {
+		close(pipefd[0]);
+		int parentid = getppid();
+		if(ptrace(PTRACE_ATTACH, parentid, NULL, NULL) == -1){
+			err("PTRACE on parent failed with %d\n", errno);
+			close(pipefd[1]);
+			return -1;
+		}
+		wait(NULL);
+		char buf[1];
+		buf[0]='c';
+		write(pipefd[1], buf, 1);
+		ptrace(PTRACE_CONT, parentid, NULL, NULL);	
+		close(pipefd[1]);
+		wait(NULL);
+		ptrace(PTRACE_SETREGS, parentid, NULL, &regs);
+		ptrace(PTRACE_SETFPREGS, parentid, NULL, &fpregs);
+		ptrace(PTRACE_CONT, parentid, NULL, NULL);
+		ptrace(PTRACE_DETACH, parentid, NULL, NULL);
+		
 		return 0;
+		/*
+		wait(NULL);
+		
+		regs.rip = 1;
+		printf("Process got a segfault again\n");
+		printf("ptrace getregs = %d\n", (int)ptrace(PTRACE_GETREGS, parentid, NULL, &regs));
+		printf("Process rip was %llx\n", regs.rip);
+		while(1);
+		return 0;
+		*/
 	}else {
+		close(pipefd[1]);
+		char buf[1];
+		read(pipefd[0], &buf, 1);
+		close(pipefd[0]);
 		log("process id: %d\n", getpid());
 		jump_to_raw_binary(load_address, params, params_address + params_size_aligned - 16);
 	}
+
 }

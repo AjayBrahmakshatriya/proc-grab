@@ -4,6 +4,7 @@
 #include "logs.h"
 #include <string.h>
 #include <stdlib.h>
+#include <sys/user.h>
 
 #define PAGE_OFFSET 0xffff800000000000ULL
 
@@ -26,6 +27,11 @@ int main(int argc, char *argv[]) {
 	if (!file)
 		return -1;
 
+	struct user_regs_struct regs;
+	struct user_fpregs_struct fpregs;
+	get_regs(process, &regs, &fpregs);
+	set_regs(file, &regs, &fpregs);
+
 	int total_sections = get_section_count(process);
 	log("Number of sections = %d\n", total_sections);
 	SECTION section;
@@ -42,7 +48,7 @@ int main(int argc, char *argv[]) {
 		section_header.raw_data_offset = section.file_offset;
 		strcpy(section_header.filename, section.file_name);
 		
-		if (!is_real_file(section.file_name)) {
+		if (!is_real_file(section.file_name) || is_section_changed(process, &section)) {
 			char *raw_data = malloc(section.size);
 			get_section_raw_data(process, &section, raw_data);
 			section_header.type = raw;
